@@ -1,16 +1,62 @@
-# === Node / CDK (cuando inicialices tu proyecto) ===
-node_modules
-*.js
-!jest.config.js
+# ─────────────────────────────────────────────
+# AWS CDK (todos los lenguajes)
+# ─────────────────────────────────────────────
+cdk.out/
 *.d.ts
-.cdk.staging
-cdk.out
-package-lock.json
+.cdk.staging/
 
-# === Python (si usas venv para probar el ETL) ===
-.venv
+# ─────────────────────────────────────────────
+# Node.js / TypeScript
+# ─────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+*.js.map
+# Compilados de TS (descomenta si aplica)
+# *.js
+
+# ─────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────
+.venv/
+venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
 
-# === Sistema ===
+# ─────────────────────────────────────────────
+# Java / Maven
+# ─────────────────────────────────────────────
+target/
+*.class
+.classpath
+.project
+.settings/
+
+# ─────────────────────────────────────────────
+# Go
+# ─────────────────────────────────────────────
+bin/
+*.exe
+
+# ─────────────────────────────────────────────
+# C# / .NET
+# ─────────────────────────────────────────────
+obj/
+*.user
+
+# ─────────────────────────────────────────────
+# Credenciales y entorno (¡nunca commitear!)
+# ─────────────────────────────────────────────
+.env
+.env.*
+*.pem
+aws-exports.js
+
+# ─────────────────────────────────────────────
+# Editores / SO
+# ─────────────────────────────────────────────
 .DS_Store
+.idea/
+.vscode/
+*.swp

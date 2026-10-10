@@ -1,90 +1,170 @@
-# Reto 5 · Plataforma de Datos Educativos 🎓📊
+# Reto 5 — Plataforma de Datos Educativos
 
-**Nivel:** Avanzado
-**Servicios:** S3 · AWS Glue · Athena · (QuickSight opcional)
-**IaC:** AWS CDK
+> **Nivel:** Avanzado · **Programa:** AWS Cloud Practitioner Challenge · **AWS SBG Univalle**
 
-> Este repositorio es un **punto de partida mínimo**. Te damos el enunciado y unos
-> datos de muestra. **Todo el proyecto lo construyes tú**: el código de CDK, el Glue
-> Job, el Crawler, el workgroup de Athena y las consultas. No hay solución incluida.
+Construye un **pipeline de datos serverless** que ingiere, transforma y consulta datos
+académicos (calificaciones, asistencia, cursos) usando **S3 + AWS Glue + Athena**, todo
+definido con **AWS CDK**.
 
 ---
 
 ## 🎯 Objetivo
 
-Construir un **pipeline de datos serverless** que ingiera, transforme y consulte datos
-académicos (calificaciones, asistencia, cursos), aprovisionando **toda** la
-infraestructura con **AWS CDK**.
+Diseñar un pipeline que convierta archivos **CSV crudos** en datos **Parquet**
+consultables con **SQL serverless**, aprovisionando toda la infraestructura analítica
+con **AWS CDK**.
 
-El camino de los datos:
+La historia completa del problema y los requisitos funcionales están en **[`requirements.md`](./requirements.md)**.
 
 ```
-CSV crudos          Glue Job (ETL)        Parquet            Crawler            Athena
-(S3 raw)      ──▶   CSV → Parquet   ──▶   (S3 processed)  ──▶  Data Catalog  ──▶  SQL serverless
+CSV crudos        Glue Job (ETL)        Parquet           Crawler            Athena
+(S3 raw)    ──▶   CSV → Parquet   ──▶   (S3 processed) ──▶ Data Catalog ──▶  SQL serverless
 ```
 
 ---
 
-## 📖 Contexto
+## 🧰 Prerrequisitos
 
-La **Universidad del Valle** quiere analizar patrones académicos de sus estudiantes:
-tasas de aprobación por asignatura, correlación entre asistencia y notas, y materias
-con mayor reprobación. Los datos llegan en archivos CSV y se actualizan mensualmente.
+Antes de empezar, asegúrate de tener:
+
+- [ ] **Node.js** 18+ (necesario para el CLI de CDK, sin importar el lenguaje que elijas)
+- [ ] **AWS CLI** configurado con credenciales válidas (`aws configure`)
+- [ ] **AWS CDK CLI** instalado globalmente:
+  ```bash
+  npm install -g aws-cdk
+  cdk --version
+  ```
+- [ ] Runtime del lenguaje que vayas a usar (uno de):
+  - **TypeScript / JavaScript** → Node.js 18+
+  - **Python** → Python 3.9+ y `pip`
+  - **Java** → JDK 11+ y Maven
+  - **Go** → Go 1.18+
+  - **C#** → .NET 6+
 
 ---
 
-## 📦 Qué te damos (lo mínimo)
+## 🚀 Inicio Rápido
+
+Este Starter Kit **no incluye el proyecto CDK ya inicializado**: tú eliges el lenguaje.
+
+### 1. Inicializa tu proyecto CDK en la carpeta `cdk/`
+
+```bash
+cd cdk
+```
+
+Elige **uno** de los siguientes lenguajes y ejecútalo dentro de `cdk/`:
+
+```bash
+# TypeScript
+cdk init app --language typescript
+
+# Python
+cdk init app --language python
+
+# Java
+cdk init app --language java
+
+# Go
+cdk init app --language go
+
+# C#
+cdk init app --language csharp
+```
+
+> 💡 `cdk init` requiere que la carpeta esté vacía. La carpeta `cdk/` viene vacía a propósito para que puedas inicializar en tu lenguaje preferido.
+
+### 2. Bootstrap del entorno (solo una vez por cuenta/región)
+
+```bash
+cdk bootstrap
+```
+
+### 3. Sintetiza, despliega y destruye
+
+```bash
+cdk synth      # Genera la plantilla de CloudFormation (valida tu código)
+cdk deploy     # Despliega la infraestructura en AWS
+cdk destroy    # Elimina TODOS los recursos (¡obligatorio al terminar!)
+```
+
+### 4. Ejecuta el pipeline (tras el deploy)
+
+1. Corre tu **Glue Job** → genera el Parquet en el bucket `processed`.
+2. Corre tu **Crawler** → registra las tablas en el Data Catalog.
+3. Consulta en **Athena** usando tu workgroup y la base de datos del catálogo.
+
+---
+
+## 📁 Estructura del repositorio
 
 ```
 .
-├── README.md                     ← este enunciado
-├── requirements.md               ← requisitos, entregables y criterios de éxito
-├── application/                  ← (vacío) aquí va tu código de app / script ETL
-├── cdk/                          ← (vacío) aquí va tu proyecto AWS CDK
-├── data/
-│   ├── calificaciones.csv        ← datos de muestra
+├── README.md              # Este archivo (inicio rápido)
+├── requirements.md        # Historia del problema y requisitos funcionales
+├── cdk/                   # 👉 Inicializa aquí tu proyecto CDK (viene vacía)
+├── application/           # Código del ETL (guía + dónde va tu script de Glue)
+│   └── README.md
+├── data/                  # Datos de muestra (CSV) + esquema
+│   ├── calificaciones.csv
 │   ├── asistencia.csv
 │   ├── cursos.csv
-│   └── DATASET_SPEC.md           ← esquema de cada CSV y clave de unión
-├── docs/
-│   ├── arquitectura.md           ← diagrama del pipeline (Mermaid)
-│   └── preguntas-de-negocio.md   ← preguntas que deben responder tus queries
-└── .gitignore
+│   └── DATASET_SPEC.md
+└── docs/
+    ├── architecture.md         # Plantilla para que documentes tu arquitectura
+    └── preguntas-de-negocio.md # Preguntas que deben responder tus queries
 ```
 
-Las carpetas `cdk/` y `application/` están vacías a propósito: **ese código lo creas tú**.
+---
+
+## 🗂️ ¿Qué hay en cada carpeta?
+
+| Carpeta / Archivo | Para qué sirve |
+|---|---|
+| `cdk/` | Aquí construyes tu infraestructura como código. Empieza vacía. |
+| `application/` | Guía para el **script del Glue Job (ETL)** que transforma los CSV a Parquet. **Lo escribes tú.** |
+| `data/` | **CSV de muestra** y su esquema (`DATASET_SPEC.md`). Son los datos que tu pipeline debe procesar. |
+| `docs/architecture.md` | Plantilla para que documentes tu diseño de arquitectura. |
+| `docs/preguntas-de-negocio.md` | Las preguntas que tus consultas SQL deben responder. |
+| `requirements.md` | Lo que tu solución debe cumplir. |
 
 ---
 
-## 📋 Requisitos y entregables
+## ✅ Lo que debes construir (resumen)
 
-Están en [`requirements.md`](requirements.md): la lista completa de requisitos,
-entregables, criterios de éxito y el Boss Fight. El diagrama del pipeline está en
-[`docs/arquitectura.md`](docs/arquitectura.md).
+1. **S3**: buckets para datos crudos (`raw`) y procesados (`processed`) — más uno para los resultados de Athena.
+2. **Glue Job (ETL)** que transforma los CSV a Parquet.
+3. **Glue Crawler** que registra el esquema en el Data Catalog.
+4. **Glue Data Catalog**: base de datos y tablas.
+5. **Athena**: un workgroup que guarda resultados en S3.
+6. Al menos **3 consultas SQL** que respondan preguntas de negocio.
+7. **(Opcional) QuickSight** para visualizar.
+
+Consulta **[`requirements.md`](./requirements.md)** para el detalle y los criterios de éxito.
 
 ---
 
-## 🧰 Pistas para empezar (no es la solución)
+## 🧹 Cleanup (¡importante!)
+
+Al terminar el reto, elimina todos los recursos para evitar costos:
 
 ```bash
-# dentro de este repo
-cdk init app --language typescript   # o el lenguaje que prefieras
-# ... escribe tu stack ...
-cdk synth
-cdk bootstrap   # la primera vez en la cuenta/región
-cdk deploy
+cd cdk
+cdk destroy
 ```
 
-Decisiones que tendrás que tomar: qué construct usar para Glue (los L1 `CfnJob` /
-`CfnCrawler` o el paquete alpha de Glue), cómo subir los CSV al bucket raw, y cómo
-pasarle al Job las rutas de entrada y salida.
+> ⚠️ Revisa la consola de AWS por **recursos huérfanos** (buckets con objetos, resultados
+> de Athena). Vacía los buckets si `cdk destroy` no los elimina por tener contenido.
 
 ---
 
-## 📤 Entrega
+## 📚 Recursos útiles
 
-Sube tu solución a tu propio repositorio (o rama) con:
-- El código CDK completo.
-- El script del ETL.
-- El archivo SQL con tus consultas.
-- Un breve apunte del Boss Fight (qué cambiarías y el cálculo de costos).
+- [AWS CDK — Documentación oficial](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
+- [AWS CDK API Reference](https://docs.aws.amazon.com/cdk/api/v2/)
+- [Amazon S3](https://docs.aws.amazon.com/s3/) · [AWS Glue](https://docs.aws.amazon.com/glue/) · [Amazon Athena](https://docs.aws.amazon.com/athena/) · [Amazon QuickSight](https://docs.aws.amazon.com/quicksight/)
+- [AWS Free Tier](https://aws.amazon.com/free/)
+
+---
+
+_AWS Student Builder Group — Universidad del Valle_
